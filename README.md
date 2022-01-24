@@ -10,7 +10,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/stiliajohny/python-git-pusher">
-    <img src="https://raw.githubusercontent.com/stiliajohny/python-git-pusher/main/.assets/logo.png" alt="Main Logo" width="80" height="80">
+    <img src=".assets/logo.png" alt="Main Logo" width="80" height="80">
   </a>
 
   <h3 align="center">python-git-pusher</h3>
