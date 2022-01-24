@@ -18,7 +18,7 @@
   <p align="center">
     Push files to multiple repos in one go
     <br />
-    <a href="./README.md"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/stiliajohny/python-git-pusher/blob/master/README.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/stiliajohny/python-git-pusher/issues/new?labels=i%3A+bug&template=1-bug-report.md">Report Bug</a>
