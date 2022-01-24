@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "git-pusher"
-version = "0.1.1"
+version = "0.1.2"
 description = "Push files in multiple git repos in one go"
 authors = ["John Stilia <stilia.johny@gmail.com>"]
 license = "GPL-3"

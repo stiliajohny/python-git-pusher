@@ -61,7 +61,7 @@ def arg_parser():
         object: An object containing the arguments
     """
 
-    parser = argparse.ArgumentParser(description='A script that pushes a list of repositories', epilog='Use it with care :B')
+    parser = argparse.ArgumentParser(description='Push files to multiple repos in one go', epilog='Use it with care :B')
     parser.add_argument('--repos', help='The repository to clone or the file contains a list of repository', required=True)
     parser.add_argument('--action', help='The action to perform', required=False)
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
