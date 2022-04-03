@@ -38,6 +38,7 @@
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [Usage](#usage)
+  - [Example Config](#example-config)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
@@ -77,8 +78,25 @@ For example push a LICENSE or ISSUE TEMPLATE or Update a Github Action. This pro
 
 ## Usage
 
-- Create a file that includes all the repos you want to push to
-- Run the tool with `git-pusher --repos <file> --files <file>`
+- Create a config yaml with all the repos and the files ( relative or absulute paths )
+- Run the command `git-pusher --config ./config.yaml --branch branch-name`
+
+### Example Config
+
+```yaml
+repos:
+  - git@github.com:stiliajohny/test1.git
+  - git@github.com:stiliajohny/test2.git
+  - git@github.com:stiliajohny/test3.git
+
+files:
+  - ./LICENSE.md
+  - ./README.md
+  - ./CHANGELOG.md
+  - ./CONTRIBUTING.md
+  - ./CODE_OF_CONDUCT.md
+  - ./CONFIG.md
+```
 
 ---
 

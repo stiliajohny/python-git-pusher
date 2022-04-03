@@ -1,6 +1,5 @@
 #!/bin/env python3
 
-"""Make a script that takes a list f repositories and  pushes the same files to all of them"""
 
 # import the python libraries required
 import os
@@ -9,12 +8,13 @@ import argparse
 import shutil
 import logging
 import re
+from tempfile import tempdir
 import git
 from pyfiglet import Figlet
+import yaml
 
 
-
-# create banner
+# Banner
 def banner():
     """Print the banner
     """
@@ -28,7 +28,7 @@ def banner():
         sys.exit()
 
 
-# create a function that checks if a binary is installed on the system
+# A function that checks if a binary is installed on the system
 def check_binary(binary):
     """ Check if a binary is installed on the system
 
@@ -52,7 +52,7 @@ def check_binary(binary):
         sys.exit()
 
 
-# create a function for the argument parser
+# A function for the argument parser
 # add the arguments repo, file, action, verbosing
 def arg_parser():
     """Create the argument parser
@@ -62,18 +62,17 @@ def arg_parser():
     """
 
     parser = argparse.ArgumentParser(description='Push files to multiple repos in one go', epilog='Use it with care :B')
-    parser.add_argument('--repos', help='The repository to clone or the file contains a list of repository', required=True)
-    parser.add_argument('--action', help='The action to perform', required=False)
+    parser.add_argument('--config', help='This file contains repos and files to be copied', required=True)
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
     parser.add_argument('--temporary-location', help='The temporary location to clone the repository', default='/tmp', required=False)
     parser.add_argument('--branch', help='The branch to make', default='git-pusher', required=False)
     parser.add_argument('--commit-message', help='The commit message', default='Commited by the git-pusher', required=False)
-    parser.add_argument('--file', help='The file(s) to push', required=True)
+    # TODO add overwrite option
     args = parser.parse_args()
     return args
 
 
-# create a functons that opens a file and return its context
+# A functons that opens a file and return its context
 def repo_list(repos):
     """ Create a list of repositories from a file or a string
 
@@ -88,7 +87,7 @@ def repo_list(repos):
         if isinstance(repos, str):
             # check if the file exists
             if os.path.isfile(repos):
-                logging.debug('Using file: ' + repos)
+                logging.debug('Using file: ' + repos) #FIXME unused code
                 with open(repos, 'r') as f:
                     repos = f.readlines()
                 logging.debug('Repositories: ' + str(repos))
@@ -118,7 +117,7 @@ def repo_list(repos):
             sys.exit()
 
 
-# crete a funcition that clones a repository with a python module and return the path of the cloned repository
+# A funcition that clones a repository with a python module and return the path of the cloned repository
 def clone_repo(repo, temp_location):
     """Clone a repository
     Args:
@@ -146,7 +145,7 @@ def clone_repo(repo, temp_location):
         sys.exit()
 
 
-# create a function that copies a file to a repository
+# A function that copies a file to a repository
 def copy_file(repo, temp_location, file):
     """Copy a file to a locaton in a repository
 
@@ -159,12 +158,11 @@ def copy_file(repo, temp_location, file):
     repo = repo.strip('\n')
     localfile = file.split('/')[-1]
     temp_location_file = temp_location + '/' + repo.split('/')[-1].split('.')[0] + '/' + localfile
-    logging.info('Copying file: ' + file + ' to ' + temp_location_file)
     try:
         # check if the file exists on the temp directory
         if os.path.isfile(temp_location_file):
-            logging.error('File already exists: ' + temp_location_file)
-            sys.exit()
+            logging.error('File already exists: ' + temp_location_file) # TODO use the overwrite option
+            pass
         else:
             # use file instead of localfile as we need the relative path of the original file to copy
             logging.info('Copying file: ' + file + ' to ' + temp_location_file)
@@ -174,7 +172,8 @@ def copy_file(repo, temp_location, file):
         logging.error(e)
         sys.exit()
 
-# create a function that makes a new branch on the cloned repository
+
+# A function that makes a new branch on the cloned repository
 def make_branch(repo, temp_location, branch):
     # remove any new lines from the repo name
     repo = repo.strip('\n')
@@ -191,10 +190,10 @@ def make_branch(repo, temp_location, branch):
         sys.exit()
 
 
-# commit a file on the cloned repository
+# Commit a file on the cloned repository
 def commit_file(repo, temp_location, file, commit_message):
     """Commit a file to a repository
-
+False
     Args:
         repo (str | list): The repository to clone ( file or url )
         temp_location (str): The temporary location to clone the repository
@@ -210,14 +209,15 @@ def commit_file(repo, temp_location, file, commit_message):
         # use the git module to commit the file
         repo = git.Repo(temp_repo_folder)
         repo.git.add(localfile) # use the filename only instead of th erelative path
-        repo.git.commit(m=commit_message)
+        # commit the file with no gpg signing
+        repo.git.commit(m=commit_message, gpg_sig=False  ) # FIXME gpg signing has issues
 
     except Exception as e:
         logging.error(e)
         sys.exit()
 
 
-# pull the latest changes from the cloned repository
+# Pull the latest changes from the cloned repository
 def pull_repo(repo, temp_location):
     """Pull the latest changes from the cloned repository
 
@@ -240,7 +240,7 @@ def pull_repo(repo, temp_location):
         sys.exit()
 
 
-# check if the branch exists on the cloned repository
+# Check if the branch exists on the cloned repository
 def check_branch(repo, temp_location, branch):
     """Check if the branch exists on the cloned repository
 
@@ -257,7 +257,7 @@ def check_branch(repo, temp_location, branch):
         # use the git module to check if the branch exists
         repo = git.Repo(temp_repo_folder)
         remote = repo.remote()
-        logging.debug('Remote: ' + str(remote))
+        logging.debug('Remote: ' + str(remote)) # BUG potential issue with the logging output
         # return the names of all the branches
         for ref in repo.references:
             # print the name of the branch wihout the remote
@@ -271,7 +271,8 @@ def check_branch(repo, temp_location, branch):
         logging.error(e)
         sys.exit()
 
-# push the changes to the remote repository
+
+# Push the changes to the remote repository
 def push_changes(repo, temp_location, branch):
     """Push the changes to the remote repository
 
@@ -296,7 +297,7 @@ def push_changes(repo, temp_location, branch):
         sys.exit()
 
 
-# check the if argument verboose is set and return DEBUG or INFO
+# Check the if argument verboose is set and return DEBUG or INFO
 def check_verbose(args):
     """Check if the verbose argument is set and return DEBUG or INFO"""
     if args.verbose:
@@ -305,23 +306,54 @@ def check_verbose(args):
         return logging.INFO
 
 
+# write a method that reads a yaml file and returns a dictionary
+def read_yaml(file):
+    """Read a yaml file and return a dictionary"""
+    # read the yaml file
+    with open(file, 'r') as stream:
+        try:
+            # load the yaml file
+            logging.debug('Yaml file: ' + file + ' loaded')
+            data = yaml.safe_load(stream)
+            logging.debug("Yaml data: " + str(data))
+            # return the dictionary
+            return data
+        except yaml.YAMLError as exc:
+            logging.error(exc)
+            sys.exit()
+
 def main():
     """Main function"""
     banner()
     args = arg_parser()
+    temporary_location=args.temporary_location
+    branch=args.branch
+    commit_message=args.commit_message
     log_format = '%(asctime)s - %(levelname)5s - %(filename)15s:%(lineno)5s - %(funcName)15s()  - %(message)s'
     logging.basicConfig(level=check_verbose(args), format=log_format)
+    logging.debug('Arguments: ' + str(args))
     check_binary('git')
 
-    repos = repo_list(args.repos)
-    for line in repos:
-        clone_repo(line, args.temporary_location)
-        # pull_repo(args.repos, args.temporary_location)
-        check_branch(line, args.temporary_location, args.branch)
-        make_branch(line, args.temporary_location, args.branch)
-        copy_file(line, args.temporary_location, args.file)
-        commit_file(line, args.temporary_location, args.file, args.commit_message)
-        push_changes(line, args.temporary_location, args.branch)
+    yaml_data=read_yaml(args.config)
+    for repo in yaml_data['repos']:
+        clone_repo(repo, temporary_location)
+        check_branch(repo, temporary_location, branch)
+        make_branch(repo, temporary_location, branch)
+        for each_file in yaml_data['files']:
+            copy_file(repo, temporary_location, each_file)
+            commit_file(repo, temporary_location, each_file, commit_message  )
+        push_changes(repo, temporary_location, branch)
+
+
+    # repos = repo_list(args.config_file)
+    # for line in repos:
+    #     clone_repo(line, args.temporary_location)
+    #     # pull_repo(args.repos, args.temporary_location)
+    #     check_branch(line, args.temporary_location, args.branch)
+    #     make_branch(line, args.temporary_location, args.branch)
+    #     copy_file(line, args.temporary_location, args.file)
+    #     commit_file(line, args.temporary_location, args.file, args.commit_message)
+    #     push_changes(line, args.temporary_location, args.branch)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,12 @@
+repos:
+  - git@github.com:stiliajohny/test1.git
+  - git@github.com:stiliajohny/test2.git
+  - git@github.com:stiliajohny/test3.git
+
+files:
+  - ./LICENSE.md
+  - ./README.md
+  - ./CHANGELOG.md
+  - ./CONTRIBUTING.md
+  - ./CODE_OF_CONDUCT.md
+  - ./CONFIG.md
